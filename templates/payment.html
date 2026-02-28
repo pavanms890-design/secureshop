@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Payment — SecureShop{% endblock %}
+
+{% block content %}
+<div class="payment-page">
+    <div class="payment-container">
+
+        <!-- ── LEFT: Order Summary ── -->
+        <div class="payment-left">
+            <h2><i class="fas fa-receipt"></i> Order Summary</h2>
+
+            <div class="payment-items">
+                {% for item in cart_items %}
+                <div class="payment-item">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}"
+                         onerror="this.src='https://via.placeholder.com/60x60?text=IMG'">
+                    <div class="payment-item-info">
+                        <p class="payment-item-name">{{ item.name }}</p>
+                        <p class="payment-item-qty">Qty: {{ item.quantity }}</p>
+                        <p style="font-size:0.8rem;color:#999;">{{ item.category }}</p>
+                    </div>
+                    <div class="payment-item-price">
+                        ₹{{ "%.0f"|format(item.price * item.quantity) }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="payment-summary-rows">
+                <div class="payment-total-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ "%.0f"|format(total) }}</span>
+                </div>
+                <div class="payment-total-row">
+                    <span>Delivery</span>
+                    <span style="color:#2ecc71;font-weight:700;">
+                        {% if total >= 499 %}FREE{% else %}₹49{% endif %}
+                    </span>
+                </div>
+                <div class="payment-total-row" style="font-size:1.1rem;font-weight:800;color:#1a1a2e;border-top:2px solid #f0f0f0;padding-top:0.75rem;margin-top:0.25rem;">
+                    <span>Total Amount</span>
+                    <span class="payment-total-amount">
+                        ₹{{ "%.0f"|format(total if total >= 499 else total + 49) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── RIGHT: Payment Card ── -->
+        <div class="payment-right">
+            <div class="payment-card">
+                <h2><i class="fas fa-lock"></i> Secure Payment</h2>
+                <p class="payment-sub">Powered by Razorpay — 100% Secure</p>
+
+                <div class="payment-badges">
+                    <span>🔒 SSL</span>
+                    <span>🛡️ Razorpay</span>
+                    <span>✅ Secure</span>
+                </div>
+
+                <div class="amount-display">
+                    <span>Amount to Pay</span>
+                    <h3>₹{{ "%.0f"|format(total if total >= 499 else total + 49) }}</h3>
+                </div>
+
+                <!-- Pay Button — calls initiatePayment() from payment.js -->
+                <button id="payBtn" class="pay-btn" type="button" onclick="initiatePayment()">
+                    <i class="fas fa-lock"></i>
+                    Pay ₹{{ "%.0f"|format(total if total >= 499 else total + 49) }} Securely
+                </button>
+
+                <p class="payment-note">
+                    <i class="fas fa-info-circle"></i>
+                    A secure Razorpay popup will open. Your card details are never stored.
+                </p>
+
+                <!-- Test Mode Info (remove in production) -->
+                <div class="test-mode-info">
+                    <strong>🧪 Test Mode</strong><br>
+                    Card: <code>4111 1111 1111 1111</code><br>
+                    Expiry: Any future date &nbsp;|&nbsp; CVV: Any 3 digits<br>
+                    OTP: <code>1234</code> (if asked)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pass data to payment.js safely using window variables -->
+<script>
+    window.RAZORPAY_KEY    = "{{ razorpay_key }}";
+    window.USER_NAME       = "{{ session.user_name | default('') }}";
+    window.USER_EMAIL      = "{{ session.user_email | default('') }}";
+    window.USER_MOBILE     = "";
+    window.PAYMENT_AMOUNT  = "₹{{ '%.0f'|format(total if total >= 499 else total + 49) }}";
+</script>
+
+<!-- Razorpay SDK (load BEFORE payment.js) -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<!-- Our payment logic -->
+<script src="{{ url_for('static', filename='js/payment.js') }}"></script>
+
+{% endblock %}

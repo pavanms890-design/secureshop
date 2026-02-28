@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Register — SecureShop{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-left">
+        <div class="auth-brand">
+            <div class="brand-logo">🛡️</div>
+            <h1>Join SecureShop</h1>
+            <p>Create your account and start shopping securely</p>
+            <div class="auth-features">
+                <div class="auth-feature"><i class="fas fa-user-shield"></i> Secure Registration</div>
+                <div class="auth-feature"><i class="fas fa-key"></i> Encrypted Passwords</div>
+                <div class="auth-feature"><i class="fas fa-gift"></i> Exclusive Member Deals</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-right">
+        <div class="auth-card">
+            <h2>Create Account ✨</h2>
+            <p class="auth-sub">Join thousands of happy shoppers</p>
+
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" name="name" placeholder="Enter your full name"
+                           required class="form-input" minlength="2">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" name="email" placeholder="Enter your email"
+                           required class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Mobile Number</label>
+                    <input type="tel" name="mobile" placeholder="10-digit mobile number"
+                           required class="form-input" pattern="[0-9]{10}" maxlength="10">
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="regPassword"
+                               placeholder="Min 6 characters" required class="form-input" minlength="6">
+                        <button type="button" class="toggle-password"
+                                onclick="togglePassword('regPassword')">
+                            <i class="fas fa-eye" id="regPasswordIcon"></i>
+                        </button>
+                    </div>
+                    <!-- Password strength bar -->
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <span class="strength-text" id="strengthText"></span>
+                </div>
+
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div class="auth-divider"><span>Already have an account?</span></div>
+            <a href="{{ url_for('login') }}" class="auth-switch-btn">Login Instead</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon  = document.getElementById(fieldId + 'Icon');
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+// Password strength checker
+document.getElementById('regPassword').addEventListener('input', function() {
+    const val    = this.value;
+    const fill   = document.getElementById('strengthFill');
+    const text   = document.getElementById('strengthText');
+    let strength = 0;
+    if (val.length >= 6)  strength++;
+    if (val.length >= 10) strength++;
+    if (/[A-Z]/.test(val)) strength++;
+    if (/[0-9]/.test(val)) strength++;
+    if (/[^A-Za-z0-9]/.test(val)) strength++;
+
+    const levels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+    const colors = ['', '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'];
+    const widths = ['0%', '20%', '40%', '60%', '80%', '100%'];
+
+    fill.style.width     = widths[strength];
+    fill.style.background= colors[strength];
+    text.textContent     = levels[strength];
+    text.style.color     = colors[strength];
+});
+</script>
+{% endblock %}

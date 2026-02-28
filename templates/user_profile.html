@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}My Profile — SecureShop{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-container">
+
+        <!-- ── Profile Sidebar ── -->
+        <aside class="profile-sidebar">
+            <div class="profile-avatar">
+                {% if user.profile_image and user.profile_image != 'default.png' %}
+                    <img src="{{ url_for('static', filename='uploads/' + user.profile_image) }}" alt="Profile">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.name[0].upper() }}</div>
+                {% endif %}
+                <div class="avatar-overlay">
+                    <label for="avatarInput"><i class="fas fa-camera"></i></label>
+                </div>
+            </div>
+            <h3 class="profile-name">{{ user.name }}</h3>
+            <p class="profile-email">{{ user.email }}</p>
+            <p class="profile-mobile"><i class="fas fa-phone"></i> {{ user.mobile }}</p>
+            <p class="profile-joined">Member since {{ user.created_at.strftime('%b %Y') }}</p>
+
+            <!-- Edit Profile Form -->
+            <form method="POST" action="{{ url_for('update_profile') }}" enctype="multipart/form-data" class="edit-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="file" id="avatarInput" name="profile_image" accept="image/*" style="display:none" onchange="this.form.submit()">
+                <input type="text" name="name" value="{{ user.name }}" class="edit-input" placeholder="Your name">
+                <input type="tel" name="mobile" value="{{ user.mobile }}" class="edit-input" placeholder="Mobile">
+                <button type="submit" class="edit-btn">Update Profile</button>
+            </form>
+        </aside>
+
+        <!-- ── Profile Main ── -->
+        <div class="profile-main">
+
+            <!-- Stats -->
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">🛍️</div>
+                    <div class="stat-num">{{ orders|length }}</div>
+                    <div class="stat-label">Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">❤️</div>
+                    <div class="stat-num">{{ favorites|length }}</div>
+                    <div class="stat-label">Favourites</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-num">₹{{ "%.0f"|format(orders|sum(attribute='total_amount')) if orders else 0 }}</div>
+                    <div class="stat-label">Total Spent</div>
+                </div>
+            </div>
+
+            <!-- Order History -->
+            <div class="profile-section">
+                <h3><i class="fas fa-box"></i> Order History</h3>
+                {% if orders %}
+                <div class="orders-table">
+                    <div class="table-header">
+                        <span>Order ID</span>
+                        <span>Amount</span>
+                        <span>Payment</span>
+                        <span>Status</span>
+                        <span>Date</span>
+                    </div>
+                    {% for order in orders %}
+                    <div class="table-row">
+                        <span>#SS{{ order.id }}</span>
+                        <span>₹{{ "%.0f"|format(order.total_amount) }}</span>
+                        <span class="status-{{ order.payment_status }}">{{ order.payment_status|title }}</span>
+                        <span>📦 {{ order.order_status|title }}</span>
+                        <span>{{ order.created_at.strftime('%d %b %Y') }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-section">
+                    <p>No orders yet. <a href="{{ url_for('products') }}">Start Shopping!</a></p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Favourites -->
+            <div class="profile-section">
+                <h3><i class="fas fa-heart"></i> My Favourites</h3>
+                {% if favorites %}
+                <div class="fav-grid">
+                    {% for product in favorites %}
+                    <div class="fav-item">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                        <div class="fav-info">
+                            <p>{{ product.name }}</p>
+                            <span>₹{{ "%.0f"|format(product.price) }}</span>
+                        </div>
+                        <div class="fav-actions">
+                            <button class="btn-cart-sm" onclick="addToCart({{ product.id }})">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                            <button class="btn-fav-sm" onclick="toggleFavorite({{ product.id }}, this)">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-section">
+                    <p>No favourites yet. <a href="{{ url_for('products') }}">Browse Products!</a></p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+{% endblock %}

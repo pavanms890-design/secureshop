@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Order Confirmed — SecureShop{% endblock %}
+
+{% block content %}
+<div class="success-page">
+    <div class="success-container">
+        <!-- Animated Checkmark -->
+        <div class="success-animation">
+            <div class="checkmark-circle">
+                <div class="checkmark">✓</div>
+            </div>
+            <div class="confetti" id="confetti"></div>
+        </div>
+
+        <h1 class="success-title">🎉 Order Confirmed!</h1>
+        <p class="success-sub">Thank you for shopping with SecureShop</p>
+
+        <div class="order-details-card">
+            <div class="order-detail-row">
+                <span>Order ID</span>
+                <strong>#SS{{ order.id }}</strong>
+            </div>
+            <div class="order-detail-row">
+                <span>Amount Paid</span>
+                <strong>₹{{ "%.0f"|format(order.total_amount) }}</strong>
+            </div>
+            <div class="order-detail-row">
+                <span>Payment Status</span>
+                <strong class="status-paid">✅ {{ order.payment_status|title }}</strong>
+            </div>
+            <div class="order-detail-row">
+                <span>Transaction ID</span>
+                <strong>{{ order.transaction_id }}</strong>
+            </div>
+            <div class="order-detail-row">
+                <span>Order Status</span>
+                <strong>📦 {{ order.order_status|title }}</strong>
+            </div>
+        </div>
+
+        <div class="success-actions">
+            <a href="{{ url_for('products') }}" class="btn-primary">Continue Shopping</a>
+            <a href="{{ url_for('profile') }}" class="btn-secondary-outline">View Orders</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.success-page { min-height: 80vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; }
+.success-container { background: white; border-radius: 24px; padding: 3rem; text-align: center; max-width: 500px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.2); animation: popIn 0.6s cubic-bezier(0.175,0.885,0.32,1.275); }
+@keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+.checkmark-circle { width: 100px; height: 100px; background: linear-gradient(135deg, #2ecc71, #27ae60); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; animation: bounceIn 0.8s ease; }
+@keyframes bounceIn { 0% { transform: scale(0); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.checkmark { color: white; font-size: 3rem; font-weight: bold; }
+.success-title { font-size: 2rem; font-weight: 800; color: #1a1a2e; margin-bottom: 0.5rem; }
+.success-sub { color: #666; margin-bottom: 2rem; }
+.order-details-card { background: #f8f9fa; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; text-align: left; }
+.order-detail-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+.order-detail-row:last-child { border-bottom: none; }
+.status-paid { color: #2ecc71; }
+.success-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-primary { background: linear-gradient(135deg, #6c63ff, #5a52e0); color: white; padding: 0.8rem 2rem; border-radius: 50px; text-decoration: none; font-weight: 600; }
+.btn-secondary-outline { border: 2px solid #6c63ff; color: #6c63ff; padding: 0.8rem 2rem; border-radius: 50px; text-decoration: none; font-weight: 600; }
+</style>
+{% endblock %}

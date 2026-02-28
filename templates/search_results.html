@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% block title %}Search: "{{ query }}" — SecureShop{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
+{% endblock %}
+
+{% block content %}
+<div style="max-width:1400px; margin:0 auto; padding:2rem 1.5rem;">
+
+    <!-- ── Page Header ── -->
+    <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:1.5rem; font-weight:800; color:#1a1a2e;">
+            Search results for:
+            <span style="color:#6c63ff;">"{{ query }}"</span>
+        </h2>
+        <p style="color:#999; margin-top:0.25rem; font-size:0.9rem;">
+            {{ results|length }} product(s) found
+        </p>
+    </div>
+
+    {% if results %}
+
+    <!-- ══════════════════════════════════════
+         IMAGE SLIDER — Top 6 matching products
+    ═══════════════════════════════════════ -->
+    <div style="margin-bottom:3rem;">
+        <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:1rem; color:#333;">
+            🖼️ Top Picks for "{{ query }}"
+        </h3>
+
+        <div style="position:relative; overflow:hidden; border-radius:20px;
+                    background:#1a1a2e; height:380px;">
+
+            <!-- Slides (top 6 results) -->
+            {% for product in results[:6] %}
+            <div class="search-slide"
+                 id="sslide-{{ loop.index0 }}"
+                 style="position:absolute; inset:0;
+                        display:grid; grid-template-columns:1fr 1fr;
+                        opacity:{% if loop.first %}1{% else %}0{% endif %};
+                        pointer-events:{% if loop.first %}all{% else %}none{% endif %};
+                        transition:opacity 0.6s ease;">
+
+                <!-- Image side -->
+                <div style="overflow:hidden; height:380px;">
+                    <img src="{{ product.image_url }}"
+                         alt="{{ product.name }}"
+                         onerror="this.src='https://via.placeholder.com/400x380?text=No+Image'"
+                         style="width:100%; height:100%; object-fit:cover;">
+                </div>
+
+                <!-- Info side -->
+                <div style="padding:2.5rem; color:white;
+                            display:flex; flex-direction:column; justify-content:center;
+                            background:linear-gradient(135deg,#1a1a2e,#16213e);">
+
+                    <span style="background:rgba(108,99,255,0.3); color:#a89cff;
+                                 padding:0.3rem 0.9rem; border-radius:50px;
+                                 font-size:0.8rem; font-weight:600;
+                                 width:fit-content; margin-bottom:1rem;">
+                        {{ product.category }}
+                    </span>
+
+                    <h2 style="font-size:1.6rem; font-weight:800;
+                               margin-bottom:0.75rem; line-height:1.3;
+                               color:white;">
+                        {{ product.name }}
+                    </h2>
+
+                    <p style="color:rgba(255,255,255,0.6); font-size:0.88rem;
+                              line-height:1.6; margin-bottom:1.5rem;">
+                        {{ product.description[:120] if product.description else 'Premium quality product' }}...
+                    </p>
+
+                    <!-- Price -->
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
+                        <span style="font-size:1.8rem; font-weight:800; color:#a89cff;">
+                            ₹{{ "%.0f"|format(product.price) }}
+                        </span>
+                        {% if product.original_price and product.original_price > product.price %}
+                        <span style="text-decoration:line-through; color:rgba(255,255,255,0.35); font-size:1rem;">
+                            ₹{{ "%.0f"|format(product.original_price) }}
+                        </span>
+                        <span style="background:#2ecc71; color:white; padding:0.2rem 0.6rem;
+                                     border-radius:50px; font-size:0.78rem; font-weight:700;">
+                            {{ ((1 - product.price/product.original_price)*100)|int }}% OFF
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Buttons -->
+                    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                        <button onclick="addToCart({{ product.id }})"
+                                type="button"
+                                style="padding:0.65rem 1.4rem;
+                                       background:rgba(255,255,255,0.12);
+                                       color:white;
+                                       border:1.5px solid rgba(255,255,255,0.3);
+                                       border-radius:50px; font-weight:600; cursor:pointer;
+                                       font-size:0.88rem;">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                        <form action="{{ url_for('buy_now', product_id=product.id) }}"
+                              method="POST" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                    style="padding:0.65rem 1.4rem;
+                                           background:linear-gradient(135deg,#6c63ff,#5a52e0);
+                                           color:white; border:none; border-radius:50px;
+                                           font-weight:600; cursor:pointer; font-size:0.88rem;">
+                                <i class="fas fa-bolt"></i> Buy Now
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Prev Button -->
+            <button type="button" onclick="changeSlide(-1)"
+                    style="position:absolute; left:1rem; top:50%;
+                           transform:translateY(-50%);
+                           background:rgba(255,255,255,0.15); color:white;
+                           border:1px solid rgba(255,255,255,0.2);
+                           width:42px; height:42px; border-radius:50%;
+                           cursor:pointer; font-size:1.2rem; z-index:10;
+                           backdrop-filter:blur(4px); transition:all 0.2s;">
+                ‹
+            </button>
+
+            <!-- Next Button -->
+            <button type="button" onclick="changeSlide(1)"
+                    style="position:absolute; right:1rem; top:50%;
+                           transform:translateY(-50%);
+                           background:rgba(255,255,255,0.15); color:white;
+                           border:1px solid rgba(255,255,255,0.2);
+                           width:42px; height:42px; border-radius:50%;
+                           cursor:pointer; font-size:1.2rem; z-index:10;
+                           backdrop-filter:blur(4px); transition:all 0.2s;">
+                ›
+            </button>
+
+            <!-- Slide Counter -->
+            <div style="position:absolute; bottom:1rem; right:1.5rem;
+                        background:rgba(0,0,0,0.5); color:white; border-radius:50px;
+                        padding:0.2rem 0.75rem; font-size:0.8rem;" id="slideCounter">
+                1 / {{ [results|length, 6]|min }}
+            </div>
+
+            <!-- Dots -->
+            <div style="position:absolute; bottom:1rem; left:50%; transform:translateX(-50%);
+                        display:flex; gap:0.5rem;" id="slideDots">
+                {% for product in results[:6] %}
+                <span onclick="goToSlide({{ loop.index0 }})"
+                      id="dot-{{ loop.index0 }}"
+                      style="width:{% if loop.first %}24px{% else %}8px{% endif %};
+                             height:8px; border-radius:50px; cursor:pointer;
+                             background:{% if loop.first %}white{% else %}rgba(255,255,255,0.35){% endif %};
+                             transition:all 0.3s ease;">
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         RELATED SUGGESTIONS (e.g. "jeans for Men")
+    ═══════════════════════════════════════ -->
+    {% if related_categories %}
+    <div style="margin-bottom:2rem;">
+        <p style="font-size:0.88rem; color:#666; margin-bottom:0.75rem; font-weight:600;">
+            🔍 Related searches:
+        </p>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+            {% for cat in related_categories %}
+            <a href="{{ url_for('search_results') }}?q={{ query }} {{ cat.category }}"
+               style="background:#f0eeff; color:#6c63ff; padding:0.4rem 1rem;
+                      border-radius:50px; font-size:0.85rem; font-weight:600;
+                      text-decoration:none; border:1.5px solid #ede9ff;
+                      transition:all 0.2s;"
+               onmouseover="this.style.background='#6c63ff';this.style.color='white';"
+               onmouseout="this.style.background='#f0eeff';this.style.color='#6c63ff';">
+                {{ query }} for {{ cat.category }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ══════════════════════════════════════
+         ALL RESULTS GRID
+    ═══════════════════════════════════════ -->
+    <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem; color:#1a1a2e;">
+        All Results ({{ results|length }})
+    </h3>
+
+    <div class="products-grid">
+        {% for product in results %}
+        <div class="product-card" data-id="{{ product.id }}">
+
+            <!-- Badges -->
+            <div class="card-badges">
+                {% if product.stock is not none and product.stock <= 2 and product.stock > 0 %}
+                    <span class="badge badge-urgent">Only {{ product.stock }} left!</span>
+                {% elif product.stock == 0 %}
+                    <span class="badge badge-urgent">Out of stock</span>
+                {% endif %}
+                {% if product.original_price and product.original_price > product.price %}
+                    <span class="badge badge-discount">
+                        {{ ((1 - product.price/product.original_price)*100)|int }}% OFF
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Favourite -->
+            <button class="fav-btn" type="button"
+                    onclick="toggleFavorite({{ product.id }}, this)">
+                <i class="fas fa-heart"></i>
+            </button>
+
+            <!-- Image -->
+            <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                <div class="card-image">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                         loading="lazy"
+                         onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                </div>
+            </a>
+
+            <!-- Info -->
+            <div class="card-info">
+                <span class="card-category">{{ product.category }}</span>
+                <h3 class="card-name">{{ product.name }}</h3>
+
+                <div class="card-rating">
+                    {% for i in range(5) %}
+                        <i class="fa{% if i < (product.rating|int) %}s{% else %}r{% endif %} fa-star
+                           {% if i < (product.rating|int) %}star-filled{% else %}star-empty{% endif %}"></i>
+                    {% endfor %}
+                    <span class="rating-num">({{ product.rating }})</span>
+                </div>
+
+                <div class="card-price">
+                    <span class="price-current">₹{{ "%.0f"|format(product.price) }}</span>
+                    {% if product.original_price and product.original_price > product.price %}
+                    <span class="price-original">₹{{ "%.0f"|format(product.original_price) }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-actions">
+                    <button class="btn-cart" type="button"
+                            onclick="addToCart({{ product.id }})">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                    <form action="{{ url_for('buy_now', product_id=product.id) }}"
+                          method="POST" style="flex:1;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn-buy">
+                            <i class="fas fa-bolt"></i> Buy Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- No Results -->
+    <div style="text-align:center; padding:4rem 1rem; color:#999;">
+        <div style="font-size:4rem; margin-bottom:1rem;">🔍</div>
+        <h3 style="font-size:1.3rem; margin-bottom:0.5rem; color:#1a1a2e;">
+            No results for "{{ query }}"
+        </h3>
+        <p style="margin-bottom:1.5rem;">Try searching with different keywords</p>
+        <a href="{{ url_for('products') }}" class="btn-primary">
+            Browse All Products
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script>
+// ── Search Result Slider ──
+const totalSlides = {{ [results|length, 6]|min if results else 0 }};
+let currentIdx = 0;
+
+function goToSlide(idx) {
+    // Hide current
+    const current = document.getElementById(`sslide-${currentIdx}`);
+    const currentDot = document.getElementById(`dot-${currentIdx}`);
+    if (current) {
+        current.style.opacity = '0';
+        current.style.pointerEvents = 'none';
+    }
+    if (currentDot) {
+        currentDot.style.width = '8px';
+        currentDot.style.background = 'rgba(255,255,255,0.35)';
+    }
+
+    // Show new
+    currentIdx = ((idx % totalSlides) + totalSlides) % totalSlides;
+    const next = document.getElementById(`sslide-${currentIdx}`);
+    const nextDot = document.getElementById(`dot-${currentIdx}`);
+    if (next) {
+        next.style.opacity = '1';
+        next.style.pointerEvents = 'all';
+    }
+    if (nextDot) {
+        nextDot.style.width = '24px';
+        nextDot.style.background = 'white';
+    }
+
+    // Update counter
+    const counter = document.getElementById('slideCounter');
+    if (counter) counter.textContent = `${currentIdx + 1} / ${totalSlides}`;
+}
+
+function changeSlide(dir) {
+    goToSlide(currentIdx + dir);
+}
+
+// Auto-advance every 3 seconds
+if (totalSlides > 1) {
+    setInterval(() => goToSlide(currentIdx + 1), 3000);
+}
+</script>
+
+{% endblock %}

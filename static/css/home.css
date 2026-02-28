@@ -1,0 +1,107 @@
+/* ═══════════════════════════════════════
+   home.css — Hero & Home Sections
+════════════════════════════════════════ */
+
+/* ── Hero Slider ── */
+.hero-section {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    overflow: hidden;
+    min-height: 520px;
+}
+.hero-slider { position: relative; height: 520px; }
+.hero-slide {
+    position: absolute; inset: 0;
+    display: flex; align-items: center;
+    opacity: 0; transform: translateX(60px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+.hero-slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+
+.hero-content {
+    max-width: 1400px; margin: 0 auto; padding: 0 2rem;
+    width: 100%; display: grid;
+    grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+}
+.hero-text { color: white; }
+.hero-badge {
+    display: inline-block;
+    background: rgba(108,99,255,0.3); color: #a89cff;
+    border: 1px solid rgba(108,99,255,0.4);
+    padding: 0.3rem 0.9rem; border-radius: 50px;
+    font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+}
+.hero-text h1 {
+    font-size: 2.5rem; font-weight: 800; line-height: 1.2;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, white 0%, #c5b8ff 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero-text p { font-size: 1rem; color: rgba(255,255,255,0.65); margin-bottom: 1.5rem; line-height: 1.6; }
+
+.hero-price { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; }
+.current-price { font-size: 2rem; font-weight: 800; color: #a89cff; }
+.original-price { font-size: 1rem; color: rgba(255,255,255,0.4); text-decoration: line-through; }
+.discount-badge { background: #2ecc71; color: white; padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
+
+.hero-actions { display: flex; gap: 1rem; }
+
+/* Hero Image */
+.hero-image { display: flex; justify-content: center; }
+.image-frame {
+    width: 320px; height: 320px; border-radius: 50%;
+    background: rgba(108,99,255,0.15);
+    border: 2px solid rgba(108,99,255,0.3);
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 60px rgba(108,99,255,0.3);
+    animation: float 4s ease-in-out infinite;
+}
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+.image-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Slider Controls */
+.slider-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.1); color: white;
+    border: 1.5px solid rgba(255,255,255,0.2); border-radius: 50%;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; cursor: pointer; z-index: 10;
+    transition: all 0.25s ease; backdrop-filter: blur(8px);
+}
+.slider-btn:hover { background: rgba(108,99,255,0.5); border-color: #6c63ff; }
+.slider-prev { left: 1.5rem; }
+.slider-next { right: 1.5rem; }
+
+.slider-dots { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.35); cursor: pointer; transition: all 0.25s ease; }
+.dot.active { background: white; width: 24px; border-radius: 50px; }
+
+/* ── Categories ── */
+.categories-section { background: white; }
+.categories-grid { display: flex; gap: 1rem; flex-wrap: wrap; }
+.category-card {
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    padding: 1.25rem 1.5rem; border-radius: 16px;
+    background: #f8f7ff; border: 1.5px solid #ede9ff;
+    cursor: pointer; transition: all 0.25s ease; text-decoration: none;
+    color: #333; min-width: 100px;
+}
+.category-card:hover { background: #6c63ff; color: white; transform: translateY(-4px); box-shadow: 0 8px 20px rgba(108,99,255,0.3); }
+.cat-icon { font-size: 2rem; }
+.category-card span { font-size: 0.85rem; font-weight: 600; }
+
+/* ── Products Section ── */
+.products-section { background: #f5f7fa; }
+
+/* ── Recommendation Section ── */
+.recommendation-section { background: white; }
+.ai-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white; padding: 0.35rem 1rem; border-radius: 50px;
+    font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem;
+}
+.section-sub { color: #666; font-size: 0.9rem; margin-top: 0.25rem; }

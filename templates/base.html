@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SecureShop{% endblock %}</title>
+
+    <!-- CSRF token in meta tag so JS can read it easily -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Base CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     HEADER / NAVBAR
+════════════════════════════════════════ -->
+<header class="navbar">
+    <div class="nav-container">
+
+        <!-- Logo -->
+        <a href="{{ url_for('home') }}" class="logo">
+            <span class="logo-icon">🛡️</span>
+            <span class="logo-text">Secure<span class="logo-accent">Shop</span></span>
+        </a>
+
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="globalSearch"
+                       placeholder="Search products, brands, categories..."
+                       autocomplete="off">
+                <button class="search-btn" type="button">Search</button>
+            </div>
+            <!-- Live search dropdown (shown by search.js) -->
+            <div class="search-dropdown" id="searchDropdown">
+                <div class="suggestions-list" id="suggestionsList"></div>
+                <div class="search-results"   id="searchResults"></div>
+            </div>
+        </div>
+
+        <!-- Nav Links -->
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}"
+               class="nav-link {% if request.endpoint == 'home' %}active{% endif %}">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="{{ url_for('products') }}"
+               class="nav-link {% if request.endpoint == 'products' %}active{% endif %}">
+                <i class="fas fa-box"></i> Products
+            </a>
+            <a href="{{ url_for('cart') }}"
+               class="nav-link cart-link {% if request.endpoint == 'cart' %}active{% endif %}">
+                <i class="fas fa-shopping-cart"></i> Cart
+                <span class="cart-badge" id="cartBadge">{{ cart_count | default(0) }}</span>
+            </a>
+            {% if session.user_id %}
+                <a href="{{ url_for('profile') }}"
+                   class="nav-link user-link {% if request.endpoint == 'profile' %}active{% endif %}">
+                    <i class="fas fa-user-circle"></i>
+                    {{ session.user_name.split()[0] if session.user_name else 'User' }}
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-link logout-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            {% endif %}
+        </nav>
+
+        <!-- Mobile hamburger button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" type="button">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+
+<!-- ═══════════════════════════════════════
+     FLASH MESSAGES (server-side messages)
+════════════════════════════════════════ -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">
+                    <span>{{ message }}</span>
+                    <button type="button" onclick="this.parentElement.remove()">×</button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- ═══════════════════════════════════════
+     PAGE CONTENT (each page fills this)
+════════════════════════════════════════ -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-brand">
+            <div class="footer-logo">🛡️ SecureShop</div>
+            <p>Your trusted secure online shopping destination. Shop with confidence.</p>
+            <div class="footer-socials">
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+        <div class="footer-links">
+            <h4>Shop</h4>
+            <a href="{{ url_for('products') }}?category=Men">Men</a>
+            <a href="{{ url_for('products') }}?category=Women">Women</a>
+            <a href="{{ url_for('products') }}?category=Kids">Kids</a>
+            <a href="{{ url_for('products') }}?category=Electronics">Electronics</a>
+        </div>
+        <div class="footer-links">
+            <h4>Account</h4>
+            <a href="{{ url_for('profile') }}">My Profile</a>
+            <a href="{{ url_for('cart') }}">My Cart</a>
+            <a href="{{ url_for('profile') }}">My Orders</a>
+            <a href="{{ url_for('profile') }}">Favourites</a>
+        </div>
+        <div class="footer-links">
+            <h4>Security</h4>
+            <a href="#">SSL Secured</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Safe Payments</a>
+            <a href="#">Return Policy</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2024 SecureShop. All rights reserved. | Built with 🔒 Security First</p>
+    </div>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     GLOBAL JAVASCRIPT (loaded on every page)
+════════════════════════════════════════ -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

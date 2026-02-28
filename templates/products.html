@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block title %}Products — SecureShop{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="products-page">
+
+    <!-- ── Sidebar Filters ── -->
+    <aside class="filters-sidebar">
+        <h3><i class="fas fa-filter"></i> Filters</h3>
+
+        <div class="filter-group">
+            <h4>Category</h4>
+            {% for cat in categories %}
+            <label class="filter-label">
+                <input type="radio" name="category" value="{{ cat.category }}"
+                    {% if current_category == cat.category %}checked{% endif %}
+                    onchange="applyFilter()">
+                <span>{{ cat.category }}</span>
+            </label>
+            {% endfor %}
+            <label class="filter-label">
+                <input type="radio" name="category" value="" {% if not current_category %}checked{% endif %}
+                       onchange="applyFilter()">
+                <span>All Categories</span>
+            </label>
+        </div>
+
+        <div class="filter-group">
+            <h4>Sort By</h4>
+            <select id="sortSelect" onchange="applyFilter()" class="filter-select">
+                <option value="" {% if not current_sort %}selected{% endif %}>Default</option>
+                <option value="price_asc"  {% if current_sort=='price_asc' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_desc" {% if current_sort=='price_desc' %}selected{% endif %}>Price: High to Low</option>
+                <option value="rating"     {% if current_sort=='rating' %}selected{% endif %}>Top Rated</option>
+            </select>
+        </div>
+
+        <button class="clear-filters" onclick="clearFilters()">
+            <i class="fas fa-times"></i> Clear Filters
+        </button>
+    </aside>
+
+    <!-- ── Main Products Area ── -->
+    <main class="products-main">
+        <div class="products-header">
+            <h2>
+                {% if current_category %}{{ current_category }}{% else %}All Products{% endif %}
+                <span class="product-count">({{ total_pages * 20 }} products)</span>
+            </h2>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid" id="productsGrid">
+            {% for product in products %}
+            <div class="product-card" data-id="{{ product.id }}">
+                <!-- Badges -->
+                <div class="card-badges">
+                    {% if product.stock <= 2 %}
+                        <span class="badge badge-urgent">Only {{ product.stock }} left!</span>
+                    {% endif %}
+                    {% if product.original_price %}
+                        <span class="badge badge-discount">
+                            {{ ((1 - product.price/product.original_price)*100)|int }}% OFF
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Fav Button -->
+                <button class="fav-btn {% if product.id in fav_ids %}active{% endif %}"
+                        onclick="toggleFavorite({{ product.id }}, this)">
+                    <i class="fas fa-heart"></i>
+                </button>
+
+                <!-- Image -->
+                <a href="{{ url_for('product_detail', product_id=product.id) }}">
+                    <div class="card-image">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" loading="lazy">
+                    </div>
+                </a>
+
+                <!-- Info -->
+                <div class="card-info">
+                    <span class="card-category">{{ product.category }}</span>
+                    <h3 class="card-name">{{ product.name }}</h3>
+                    <div class="card-rating">
+                        {% for i in range(5) %}
+                            <i class="fa{% if i < product.rating|int %}s{% else %}r{% endif %} fa-star {% if i < product.rating|int %}star-filled{% else %}star-empty{% endif %}"></i>
+                        {% endfor %}
+                        <span class="rating-num">({{ product.rating }})</span>
+                    </div>
+                    <div class="card-price">
+                        <span class="price-current">₹{{ "%.0f"|format(product.price) }}</span>
+                        {% if product.original_price %}
+                        <span class="price-original">₹{{ "%.0f"|format(product.original_price) }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-cart {% if product.id in cart_ids %}in-cart{% endif %}"
+                                onclick="addToCart({{ product.id }})">
+                            <i class="fas fa-cart-plus"></i>
+                            {{ 'In Cart' if product.id in cart_ids else 'Add to Cart' }}
+                        </button>
+                        <form action="{{ url_for('buy_now', product_id=product.id) }}" method="POST" style="flex:1">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn-buy">
+                                <i class="fas fa-bolt"></i> Buy Now
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="no-products">
+                <i class="fas fa-box-open"></i>
+                <p>No products found for this filter.</p>
+                <a href="{{ url_for('products') }}" class="btn-primary">Clear Filters</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+            <a href="?page={{ page-1 }}&category={{ current_category }}&sort={{ current_sort }}"
+               class="page-btn">← Prev</a>
+            {% endif %}
+
+            {% for p in range(1, total_pages+1) %}
+                {% if p <= 5 or p == total_pages or (p >= page-1 and p <= page+1) %}
+                <a href="?page={{ p }}&category={{ current_category }}&sort={{ current_sort }}"
+                   class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <a href="?page={{ page+1 }}&category={{ current_category }}&sort={{ current_sort }}"
+               class="page-btn">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<script>
+function applyFilter() {
+    const category = document.querySelector('input[name="category"]:checked')?.value || '';
+    const sort     = document.getElementById('sortSelect').value;
+    window.location.href = `/products?category=${category}&sort=${sort}`;
+}
+
+function clearFilters() {
+    window.location.href = '/products';
+}
+</script>
+{% endblock %}

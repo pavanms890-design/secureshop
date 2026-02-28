@@ -1,0 +1,22 @@
+/* products.css */
+.products-page { display: grid; grid-template-columns: 260px 1fr; gap: 2rem; max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+.filters-sidebar { background: white; border-radius: 20px; padding: 1.5rem; height: fit-content; box-shadow: 0 4px 20px rgba(0,0,0,0.06); position: sticky; top: 80px; }
+.filters-sidebar h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; color: #1a1a2e; }
+.filter-group { margin-bottom: 1.5rem; }
+.filter-group h4 { font-size: 0.85rem; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; }
+.filter-label { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; cursor: pointer; font-size: 0.88rem; color: #444; }
+.filter-label input[type="radio"] { accent-color: #6c63ff; }
+.filter-label:hover { color: #6c63ff; }
+.filter-select { width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.88rem; color: #333; font-family: 'DM Sans', sans-serif; }
+.filter-select:focus { border-color: #6c63ff; outline: none; }
+.clear-filters { width: 100%; padding: 0.65rem; background: #fee5e5; color: #e74c3c; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.25s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+.clear-filters:hover { background: #e74c3c; color: white; }
+.products-header { margin-bottom: 1.5rem; }
+.products-header h2 { font-size: 1.4rem; font-weight: 800; color: #1a1a2e; }
+.product-count { font-size: 1rem; color: #999; font-weight: 400; }
+.no-products { grid-column: 1 / -1; text-align: center; padding: 4rem; color: #999; }
+.no-products i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+.pagination { display: flex; gap: 0.5rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
+.page-btn { padding: 0.6rem 1rem; border-radius: 8px; background: white; color: #333; border: 1.5px solid #e0e0e0; font-size: 0.88rem; font-weight: 500; text-decoration: none; transition: all 0.25s; }
+.page-btn:hover, .page-btn.active { background: #6c63ff; color: white; border-color: #6c63ff; }
+@media (max-width: 768px) { .products-page { grid-template-columns: 1fr; } .filters-sidebar { position: static; } }
