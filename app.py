@@ -35,17 +35,22 @@ csrf = CSRFProtect(app)
 # ══════════════════════════════════════
 # DATABASE CONNECTION
 # ══════════════════════════════════════
-def get_db():
-    """Returns a fresh MySQL database connection using PyMySQL"""
-    return pymysql.connect(
-        host='localhost',
-        user='root',
-        password='Pavanvas@123',   # ← Change to YOUR password
-        database='secure_shop',
-        cursorclass=pymysql.cursors.DictCursor,
-        ssl_disabled=True,
-        autocommit=False
-    )
+import os
+import pymysql
+from urllib.parse import urlparse
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+url = urlparse(DATABASE_URL)
+
+connection = pymysql.connect(
+    host=url.hostname,
+    user=url.username,
+    password=url.password,
+    database=url.path[1:],   # remove /
+    port=url.port,
+    cursorclass=pymysql.cursors.DictCursor
+)
 
 # ══════════════════════════════════════
 # HELPER: ALLOWED IMAGE EXTENSIONS
